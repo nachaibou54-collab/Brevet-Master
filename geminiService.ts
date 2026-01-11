@@ -107,7 +107,7 @@ export const askClarification = async (subject: string, topic: string, summary: 
 
   try {
     const response = await ai.models.generateContent({
-      model: 'gemini-3-flash-preview',
+      model: gemini-1.5-flash,
       contents: prompt
     });
     return response.text || "Désolé, je n'ai pas pu générer d'explication.";
