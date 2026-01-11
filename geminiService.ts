@@ -21,7 +21,7 @@ export const generateQuiz = async (subject: Subject, topic: string): Promise<Qui
 
   try {
     const response = await ai.models.generateContent({
-      model: 'gemini-3-pro-preview',
+      model: 'gemini-1.5-flash',
       contents: prompt,
       config: {
         responseMimeType: "application/json",
