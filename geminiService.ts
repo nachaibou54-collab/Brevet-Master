@@ -58,8 +58,7 @@ export const generateQuiz = async (subject: Subject, topic: string): Promise<Qui
  * Utilise gemini-1.5-flash pour garantir une haute qualité pédagogique sur les sujets du Brevet.
  */
 export async function* generateSummaryStream(subject: Subject, topic: string): AsyncGenerator<string> {
-  const ai = new GoogleGenerativeAI(process.env.GEMINI_API_KEY)
-
+  const ai = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
   let subjectSpecificInstructions = '';
   if (subject === 'Histoire-Géographie & EMC') {
     subjectSpecificInstructions = `
@@ -99,8 +98,7 @@ export async function* generateSummaryStream(subject: Subject, topic: string): A
  * Utilise gemini-3-flash-preview pour une assistance pédagogique réactive et simple.
  */
 export const askClarification = async (subject: string, topic: string, summary: string, question: string): Promise<string> => {
-  const ai = new GoogleGenerativeAI(process.env.GEMINI_API_KEY)
-
+  const ai = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
   const prompt = `Tu es un professeur de 3ème bienveillant. Réponds à cette question sur le chapitre "${topic}" (${subject}).
   CONTEXTE : ${summary}
   QUESTION : "${question}"`;
