@@ -8,7 +8,7 @@ import { errorTracker } from "./utils/errorTracker";
  * Utilise gemini-1.5-flash pour les tâches STEM et de raisonnement complexe (Brevet 3ème).
  */
 export const generateQuiz = async (subject: Subject, topic: string): Promise<QuizQuestion[]> => {
-  const ai = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
+  const ai = new GoogleGenerativeAI('AIzaSyBXkuw41o7oM-HtpkV-TFGBfUSC8c88rg8');
   
   const prompt = `Génère un quiz de 5 questions à choix multiples pour le niveau Brevet des Collèges (3ème) sur le sujet suivant : ${subject} - Chapitre : ${topic}. 
   Les questions doivent être variées et conformes au programme scolaire français. 
