@@ -1,5 +1,5 @@
 
-import { GoogleGenAI, Type, GenerateContentResponse } from "@google/genai";
+import { GoogleGenerativeAI, Type, GenerateContentResponse } from "@google/generative-ai";
 import { QuizQuestion, Subject } from "./types";
 import { errorTracker } from "./utils/errorTracker";
 
