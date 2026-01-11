@@ -20,15 +20,18 @@ export const generateQuiz = async (subject: Subject, topic: string): Promise<Qui
   Donne une explication pédagogique concise pour chaque réponse.`;
 
   try {
-    const response = await ai.models.generateContent({
-      model: 'gemini-1.5-flash',
-      contents: prompt,
-      config: {
+    const model = ai.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const result = await model.generateContent({
+      contents: [{ role: 'user', parts: [{ text: prompt }] }],
+      generationConfig: {
         responseMimeType: "application/json",
         responseSchema: {
           type: Type.ARRAY,
           items: {
-            type: Type.OBJECT,
+            const model = ai.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const result = await model.generateContent({
+      contents: [{ role: 'user', parts: [{ text: prompt }] }],
+      generationConfig: {
             properties: {
               question: { type: Type.STRING },
               options: { 
@@ -46,7 +49,8 @@ export const generateQuiz = async (subject: Subject, topic: string): Promise<Qui
       }
     });
 
-    return JSON.parse(response.text || '[]');
+    const response = await result.response;
+    return JSON.parse(response.text() || '[]');
   } catch (error) {
     errorTracker.captureError(error instanceof Error ? error : new Error('Erreur API Gemini Quiz'), { context: 'generateQuiz', subject, topic });
     throw error;
@@ -76,10 +80,11 @@ export async function* generateSummaryStream(subject: Subject, topic: string): A
   Structure : Le Cœur du Sujet, Cours Détaillé, ${subjectSpecificInstructions}, Flash-Mémoire, Conseil de l'Examinateur.`;
 
   try {
-    const result = await ai.models.generateContentStream({
-      model: 'gemini-1.5-flash',
-      contents: prompt
-    });
+    const model = ai.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const result = await model.generateContent({
+      contents: [{ role: 'user', parts: [{ text: prompt }] }],
+      generationConfig: {
+        temperature: 0.7,
 
     for await (const chunk of result) {
       const response = chunk as GenerateContentResponse;
@@ -104,11 +109,12 @@ export const askClarification = async (subject: string, topic: string, summary: 
   QUESTION : "${question}"`;
 
   try {
-    const response = await ai.models.generateContent({
-      model: gemini-1.5-flash,
-      contents: prompt
+    const model = ai.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const result = await model.generateContent({
+      contents: [{ role: 'user', parts: [{ text: prompt }] }],
     });
-    return response.text || "Désolé, je n'ai pas pu générer d'explication.";
+    const response = await result.response;
+    return response.text() || "Désolé, je n'ai pas pu générer d'explication.";
   } catch (error) {
     errorTracker.captureError(error instanceof Error ? error : new Error('Erreur API Clarification'), { context: 'askClarification', subject, topic });
     throw error;
