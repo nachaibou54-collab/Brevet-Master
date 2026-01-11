@@ -1,0 +1,7 @@
+{
+  "name": "Brevet Master - Révisions Collège",
+  "description": "Une plateforme interactive de révision pour le Brevet des Collèges utilisant l'IA pour générer des quiz personnalisés et des fiches de synthèse en Mathématiques, Français, Histoire-Géo, EMC et Sciences.",
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}
