@@ -5,7 +5,7 @@ import { errorTracker } from "./utils/errorTracker";
 
 /**
  * Génère un quiz de révision.
- * Utilise gemini-3-pro-preview pour les tâches STEM et de raisonnement complexe (Brevet 3ème).
+ * Utilise gemini-1.5-flash pour les tâches STEM et de raisonnement complexe (Brevet 3ème).
  */
 export const generateQuiz = async (subject: Subject, topic: string): Promise<QuizQuestion[]> => {
   const ai = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
@@ -55,7 +55,7 @@ export const generateQuiz = async (subject: Subject, topic: string): Promise<Qui
 
 /**
  * Génère une fiche de révision en streaming pour un affichage ultra-rapide.
- * Utilise gemini-3-pro-preview pour garantir une haute qualité pédagogique sur les sujets du Brevet.
+ * Utilise gemini-1.5-flash pour garantir une haute qualité pédagogique sur les sujets du Brevet.
  */
 export async function* generateSummaryStream(subject: Subject, topic: string): AsyncGenerator<string> {
   const ai = new GoogleGenerativeAI(process.env.GEMINI_API_KEY)
@@ -78,7 +78,7 @@ export async function* generateSummaryStream(subject: Subject, topic: string): A
 
   try {
     const result = await ai.models.generateContentStream({
-      model: 'gemini-3-pro-preview',
+      model: 'gemini-1.5-flash',
       contents: prompt
     });
 
