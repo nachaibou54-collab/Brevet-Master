@@ -1,0 +1,48 @@
+/* Design Moderne pour Brevet Master */
+:root {
+  --primary: #4a90e2;
+  --secondary: #f39c12;
+  --bg: #f8f9fa;
+  --text: #2c3e50;
+}
+
+body {
+  background-color: var(--bg);
+  color: var(--text);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  margin: 0;
+  display: flex;
+  justify-content: center;
+  padding: 20px;
+}
+
+.container {
+  max-width: 800px;
+  width: 100%;
+  background: white;
+  padding: 30px;
+  border-radius: 15px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+button {
+  background-color: var(--primary);
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: transform 0.2s, background 0.3s;
+}
+
+button:hover {
+  background-color: #357abd;
+  transform: translateY(-2px);
+}
+
+.quiz-container {
+  margin-top: 20px;
+  border-left: 5px solid var(--secondary);
+  padding-left: 20px;
+}
