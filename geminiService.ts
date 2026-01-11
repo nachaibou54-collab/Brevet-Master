@@ -8,7 +8,7 @@ import { errorTracker } from "./utils/errorTracker";
  * Utilise gemini-3-pro-preview pour les tâches STEM et de raisonnement complexe (Brevet 3ème).
  */
 export const generateQuiz = async (subject: Subject, topic: string): Promise<QuizQuestion[]> => {
-  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+  const ai = new GoogleGenAI({ CLE_API: process.env.CLE_API });
   
   const prompt = `Génère un quiz de 5 questions à choix multiples pour le niveau Brevet des Collèges (3ème) sur le sujet suivant : ${subject} - Chapitre : ${topic}. 
   Les questions doivent être variées et conformes au programme scolaire français. 
@@ -58,7 +58,7 @@ export const generateQuiz = async (subject: Subject, topic: string): Promise<Qui
  * Utilise gemini-3-pro-preview pour garantir une haute qualité pédagogique sur les sujets du Brevet.
  */
 export async function* generateSummaryStream(subject: Subject, topic: string): AsyncGenerator<string> {
-  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+  const ai = new GoogleGenAI({ apiKey: process.env.CLE_API });
 
   let subjectSpecificInstructions = '';
   if (subject === 'Histoire-Géographie & EMC') {
@@ -99,7 +99,7 @@ export async function* generateSummaryStream(subject: Subject, topic: string): A
  * Utilise gemini-3-flash-preview pour une assistance pédagogique réactive et simple.
  */
 export const askClarification = async (subject: string, topic: string, summary: string, question: string): Promise<string> => {
-  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+  const ai = new GoogleGenAI({ apiKey: process.env.CLE_API });
 
   const prompt = `Tu es un professeur de 3ème bienveillant. Réponds à cette question sur le chapitre "${topic}" (${subject}).
   CONTEXTE : ${summary}
