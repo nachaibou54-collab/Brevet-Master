@@ -1,122 +1,79 @@
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
-import { GoogleGenerativeAI, GenerateContentResponse } from "@google/generative-ai";
-import { QuizQuestion, Subject } from "./types";
-import { errorTracker } from "./utils/errorTracker";
+// Initialisation du client Gemini
+const ai = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
 
-/**
- * Génère un quiz de révision.
- * Utilise gemini-1.5-flash pour les tâches STEM et de raisonnement complexe (Brevet 3ème).
- */
-export const generateQuiz = async (subject: Subject, topic: string): Promise<QuizQuestion[]> => {
-  const ai = new GoogleGenerativeAI('AIzaSyBXkuw41o7oM-HtpkV-TFGBfUSC8c88rg8');
-  
-  const prompt = `Génère un quiz de 5 questions à choix multiples pour le niveau Brevet des Collèges (3ème) sur le sujet suivant : ${subject} - Chapitre : ${topic}. 
-  Les questions doivent être variées et conformes au programme scolaire français. 
-  
-  IMPORTANT : Pour les expressions mathématiques :
-  - Utilise le symbole de multiplication '×' (U+00D7) pour les multiplications.
-  - Utilise la lettre minuscule 'x' uniquement pour la variable mathématique (ex: 2x + 3).
-  
-  Donne une explication pédagogique concise pour chaque réponse.`;
+// --- FONCTION 1 : GÉNÉRATION DU QUIZ ---
+export const generateQuiz = async (subject: any, topic: string) => {
+  // 1. On définit le modèle (Flash est rapide et économique)
+  const model = ai.getGenerativeModel({ 
+    model: "gemini-1.5-flash",
+    generationConfig: {
+      responseMimeType: "application/json" // Force la réponse en JSON pur
+    }
+  });
+
+  // 2. Le prompt précis pour avoir du JSON
+  const prompt = `Génère un quiz de 5 questions QCM sur le sujet "${subject}" et le thème "${topic}".
+  Le format de réponse DOIT être un tableau JSON strict comme ceci :
+  [
+    {
+      "question": "La question ?",
+      "options": ["Choix A", "Choix B", "Choix C", "Choix D"],
+      "answer": 0,
+      "explanation": "Pourquoi c'est la bonne réponse."
+    }
+  ]
+  Ne mets pas de balises markdown, juste le JSON.`;
 
   try {
-    const model = ai.getGenerativeModel({ model: "gemini-1.5-flash" });
+    // 3. Appel à l'IA
     const result = await model.generateContent({
       contents: [{ role: 'user', parts: [{ text: prompt }] }],
-      generationConfig: {
-        responseMimeType: "application/json",
-        responseSchema: {
-          type: Type.ARRAY,
-          items: {
-            const model = ai.getGenerativeModel({ model: "gemini-1.5-flash" });
-    const result = await model.generateContent({
-      contents: [{ role: 'user', parts: [{ text: prompt }] }],
-      generationConfig: {
-            properties: {
-              question: { type: Type.STRING },
-              options: { 
-                type: Type.ARRAY, 
-                items: { type: Type.STRING },
-                description: "4 options possibles"
-              },
-              correctAnswer: { type: Type.INTEGER, description: "Index de la réponse correcte (0-3)" },
-              explanation: { type: Type.STRING }
-            },
-            required: ["question", "options", "correctAnswer", "explanation"],
-            propertyOrdering: ["question", "options", "correctAnswer", "explanation"]
-          }
-        }
-      }
     });
 
     const response = await result.response;
-    return JSON.parse(response.text() || '[]');
+    const text = response.text();
+    
+    // 4. On nettoie et on renvoie l'objet
+    return JSON.parse(text);
+
   } catch (error) {
-    errorTracker.captureError(error instanceof Error ? error : new Error('Erreur API Gemini Quiz'), { context: 'generateQuiz', subject, topic });
+    console.error("Erreur génération Quiz:", error);
+    // En cas d'erreur, on renvoie un tableau vide pour ne pas faire planter le site
+    return [];
+  }
+};
+
+// --- FONCTION 2 : RÉSUMÉ EN STREAMING ---
+export const generateSummaryStream = async (prompt: string) => {
+  try {
+    const model = ai.getGenerativeModel({ model: "gemini-1.5-flash" });
+    
+    const result = await model.generateContentStream({
+      contents: [{ role: 'user', parts: [{ text: prompt }] }],
+    });
+    
+    return result.stream;
+  } catch (error) {
+    console.error("Erreur stream résumé:", error);
     throw error;
   }
 };
 
-/**
- * Génère une fiche de révision en streaming pour un affichage ultra-rapide.
- * Utilise gemini-1.5-flash pour garantir une haute qualité pédagogique sur les sujets du Brevet.
- */
-export async function* generateSummaryStream(subject: Subject, topic: string): AsyncGenerator<string> {
-  const ai = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
-  let subjectSpecificInstructions = '';
-  if (subject === 'Histoire-Géographie & EMC') {
-    subjectSpecificInstructions = `
-    - Section **"Chronologie Express"** : Liste les dates et événements pivots.
-    - Section **"Vocabulaire Clé"** : Définitions indispensables.`;
-  } else if (subject === 'Mathématiques') {
-    subjectSpecificInstructions = `
-    - Section **"L'Essentiel en Formules"** : Présente les formules vitales.
-    - Section **"Méthode Type"** : Résolution étape par étape.`;
-  }
-
-  const prompt = `Agis comme le meilleur professeur de France spécialisé dans la préparation au Brevet des Collèges. 
-  Rédige une fiche de révision "ULTRA-PERFORMANTE" pour le Brevet 2025.
-  Sujet : ${subject} - Chapitre : ${topic}.
-  Structure : Le Cœur du Sujet, Cours Détaillé, ${subjectSpecificInstructions}, Flash-Mémoire, Conseil de l'Examinateur.`;
-
+// --- FONCTION 3 : CLARIFICATION / QUESTION ---
+export const askClarification = async (prompt: string) => {
   try {
     const model = ai.getGenerativeModel({ model: "gemini-1.5-flash" });
-    const result = await model.generateContent({
-      contents: [{ role: 'user', parts: [{ text: prompt }] }],
-      generationConfig: {
-        temperature: 0.7,
-
-    for await (const chunk of result) {
-      const response = chunk as GenerateContentResponse;
-      if (response.text) {
-        yield response.text;
-      }
-    }
-  } catch (error) {
-    errorTracker.captureError(error instanceof Error ? error : new Error('Erreur API Gemini Summary Stream'), { context: 'generateSummaryStream', subject, topic });
-    throw error;
-  }
-}
-
-/**
- * Clarification interactive.
- * Utilise gemini-3-flash-preview pour une assistance pédagogique réactive et simple.
- */
-export const askClarification = async (subject: string, topic: string, summary: string, question: string): Promise<string> => {
-  const ai = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
-  const prompt = `Tu es un professeur de 3ème bienveillant. Réponds à cette question sur le chapitre "${topic}" (${subject}).
-  CONTEXTE : ${summary}
-  QUESTION : "${question}"`;
-
-  try {
-    const model = ai.getGenerativeModel({ model: "gemini-1.5-flash" });
+    
     const result = await model.generateContent({
       contents: [{ role: 'user', parts: [{ text: prompt }] }],
     });
+    
     const response = await result.response;
     return response.text() || "Désolé, je n'ai pas pu générer d'explication.";
   } catch (error) {
-    errorTracker.captureError(error instanceof Error ? error : new Error('Erreur API Clarification'), { context: 'askClarification', subject, topic });
-    throw error;
+    console.error("Erreur clarification:", error);
+    return "Une erreur est survenue lors de l'explication.";
   }
 };
